@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MindAR + A-Frame Demo</title>
+    <!-- Core -->
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image.prod.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: true"
+    >
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- เมื่อกล้อง detect ได้ จะวาง 3D model -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model
+          src="./model.gltf"
+          scale="0.2 0.2 0.2"
+          position="0 0 0"
+        ></a-gltf-model>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
