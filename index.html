@@ -70,35 +70,5 @@
         ></a-gltf-model>
       </a-entity>
     </a-scene>
-
-    <script>
-      // Status tracking
-      const statusEl = document.getElementById("status");
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const sceneEl = document.querySelector("a-scene");
-
-        sceneEl.addEventListener("arReady", () => {
-          statusEl.textContent = "AR พร้อมใช้งาน - ส่องกล้องไปที่ marker";
-        });
-
-        sceneEl.addEventListener("arError", () => {
-          statusEl.textContent = "เกิดข้อผิดพลาด - โปรดรีเฟรชหน้า";
-        });
-
-        // Track detection
-        const target = document.querySelector(
-          '[mindar-image-target="targetIndex: 0"]'
-        );
-
-        target.addEventListener("targetFound", () => {
-          statusEl.textContent = "ตรวจพบ 3D Model";
-        });
-
-        target.addEventListener("targetLost", () => {
-          statusEl.textContent = "AR พร้อมใช้งาน - ส่องกล้องไปที่ marker";
-        });
-      });
-    </script>
   </body>
 </html>
