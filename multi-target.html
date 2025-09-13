@@ -81,22 +81,27 @@
       </a-entity>
 
       <!-- Target 2: Video -->
-      <a-entity mindar-image-target="targetIndex: 1">
-        <a-video src="#video" scale="1 0.75 1" position="0 0 0.1"></a-video>
-      </a-entity>
-
-      <!-- Assets -->
       <a-assets>
         <video
           id="video"
           src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
-          preload="auto"
-          loop
+          autoplay
           muted
+          loop
           playsinline
           webkit-playsinline
         ></video>
       </a-assets>
+
+      <a-entity mindar-image-target="targetIndex: 1">
+        <a-video src="#video" scale="1 0.75 1" position="0 0 0.1"></a-video>
+      </a-entity>
+
+      <script>
+        document.querySelector("a-scene").addEventListener("arReady", () => {
+          document.getElementById("video").play(); // <-- บรรทัดเดียวให้ video เริ่ม
+        });
+      </script>
     </a-scene>
   </body>
 </html>
