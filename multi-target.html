@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>AR Single Target Demo</title>
+    <title>AR Multi-Target Demo</title>
     <!-- Core -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image.prod.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -55,50 +55,48 @@
     <div class="status" id="status">กำลังโหลด AR...</div>
 
     <a-scene
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
+      mindar-image="imageTargetSrc: ./merge2.mind; autoStart: true; maxTrack: 3;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: true"
     >
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- เมื่อกล้อง detect ได้ จะวาง 3D model -->
-      <a-entity mindar-image-target="targetIndex: 0">
+      <!-- Target 0: 3D Model -->
+      <a-entity mindar-image-target="targetIndex: 2">
         <a-gltf-model
           src="./model.gltf"
           scale="0.2 0.2 0.2"
           position="0 0 0"
         ></a-gltf-model>
       </a-entity>
+
+      <!-- Target 1: Image Overlay -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-image
+          src="https://res.cloudinary.com/dy4mj1kbt/image/upload/v1741769930/AS0101_pamh6b.jpg"
+          scale="1 1 1"
+          position="0 0 0.1"
+          opacity="1"
+        ></a-image>
+      </a-entity>
+
+      <!-- Target 2: Video -->
+      <a-entity mindar-image-target="targetIndex: 1">
+        <a-video src="#video" scale="1 0.75 1" position="0 0 0.1"></a-video>
+      </a-entity>
+
+      <!-- Assets -->
+      <a-assets>
+        <video
+          id="video"
+          src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+          preload="auto"
+          loop
+          muted
+          playsinline
+          webkit-playsinline
+        ></video>
+      </a-assets>
     </a-scene>
-
-    <script>
-      // Status tracking
-      const statusEl = document.getElementById("status");
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const sceneEl = document.querySelector("a-scene");
-
-        sceneEl.addEventListener("arReady", () => {
-          statusEl.textContent = "AR พร้อมใช้งาน - ส่องกล้องไปที่ marker";
-        });
-
-        sceneEl.addEventListener("arError", () => {
-          statusEl.textContent = "เกิดข้อผิดพลาด - โปรดรีเฟรชหน้า";
-        });
-
-        // Track detection
-        const target = document.querySelector(
-          '[mindar-image-target="targetIndex: 0"]'
-        );
-
-        target.addEventListener("targetFound", () => {
-          statusEl.textContent = "ตรวจพบ 3D Model";
-        });
-
-        target.addEventListener("targetLost", () => {
-          statusEl.textContent = "AR พร้อมใช้งาน - ส่องกล้องไปที่ marker";
-        });
-      });
-    </script>
   </body>
 </html>
