@@ -60,7 +60,7 @@ async function initAR() {
       entity.appendChild(model);
     }
 
-    if (t.type === "Image Overlay") {
+    if (t.type === "Image") {
       const img = document.createElement("a-image");
       img.setAttribute("src", t.src);
       img.setAttribute("scale", t.scale.join(" "));

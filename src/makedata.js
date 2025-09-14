@@ -7,7 +7,7 @@ export const ARData = {
       position: [0, 0, 0]
     },
     "target1": {
-      type: "Image Overlay",
+      type: "Image",
       src: "https://res.cloudinary.com/dy4mj1kbt/image/upload/v1741769930/AS0101_pamh6b.jpg",
       scale: [1, 1, 1],
       position: [0, 0, 0.1],
