@@ -139,19 +139,23 @@ document.getElementById("asset-form").addEventListener("submit", async (e) => {
     } else {
       // Create: ต้องมีไฟล์
       if (!file) throw new Error("กรุณาอัปโหลดไฟล์");
-      const type = getAssetType(file.name);
-      // จำลอง URL (ในระบบจริงควรอัปโหลดไฟล์ไปยัง Supabase Storage และรับ URL)
-      const src = `https://example.com/storage/${file.name}`; // เปลี่ยนเป็นการอัปโหลดจริง
-      payload.type = type;
-      payload.src = src;
-      const url = `${SUPABASE_URL}/rest/v1/AR_ASSETS`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
-      showStatus("บันทึกข้อมูลสำเร็จ!", "text-success");
+const type = getAssetType(file.name);
+const fileName = `${Date.now()}_${file.name}`; // เพิ่ม timestamp เพื่อป้องกันชื่อไฟล์ซ้ำ
+const { data, error } = await supabase.storage
+    .from('assets')
+    .upload(fileName, file);
+if (error) throw new Error(`ไม่สามารถอัปโหลดไฟล์: ${error.message}`);
+const src = supabase.storage.from('assets').getPublicUrl(fileName).data.publicUrl;
+payload.type = type;
+payload.src = src;
+const url = `${SUPABASE_URL}/rest/v1/AR_ASSETS`;
+const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+});
+if (!response.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
+showStatus("บันทึกข้อมูลสำเร็จ!", "text-success");
     }
     document.getElementById("asset-form").reset();
     document.getElementById("asset-id").value = "";
