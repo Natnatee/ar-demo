@@ -139,24 +139,37 @@ document.getElementById("asset-form").addEventListener("submit", async (e) => {
     } else {
       // Create: ต้องมีไฟล์
       if (!file) throw new Error("กรุณาอัปโหลดไฟล์");
-const type = getAssetType(file.name);
-const fileName = `${Date.now()}_${file.name}`; // เพิ่ม timestamp เพื่อป้องกันชื่อไฟล์ซ้ำ
-const { data, error } = await supabase.storage
-    .from('assets')
-    .upload(fileName, file);
-if (error) throw new Error(`ไม่สามารถอัปโหลดไฟล์: ${error.message}`);
-const src = supabase.storage.from('assets').getPublicUrl(fileName).data.publicUrl;
-payload.type = type;
-payload.src = src;
-const url = `${SUPABASE_URL}/rest/v1/AR_ASSETS`;
-const response = await fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-});
-if (!response.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
-showStatus("บันทึกข้อมูลสำเร็จ!", "text-success");
+      const type = getAssetType(file.name);
+
+      // 1) อัปโหลดไฟล์ไป Supabase Storage
+      const uploadUrl = `${SUPABASE_URL}/storage/v1/object/assets/${file.name}`;
+      const uploadRes = await fetch(uploadUrl, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: file,
+      });
+      if (!uploadRes.ok) throw new Error("อัปโหลดไฟล์ไป Storage ไม่สำเร็จ");
+
+      // 2) URL ของไฟล์ใน Storage
+      const src = `${SUPABASE_URL}/storage/v1/object/assets/${file.name}`;
+
+      // 3) บันทึกลงตาราง AR_ASSETS
+      payload.type = type;
+      payload.src = src;
+
+      const url = `${SUPABASE_URL}/rest/v1/AR_ASSETS`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
+      showStatus("บันทึกข้อมูลสำเร็จ!", "text-success");
     }
+
     document.getElementById("asset-form").reset();
     document.getElementById("asset-id").value = "";
     fileInput.value = "";

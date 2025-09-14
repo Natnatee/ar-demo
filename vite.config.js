@@ -5,7 +5,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
-        multi: 'multi-target.html'
+        multi: 'multi-target.html',
+        admin: 'admin.html'
       }
     }
   }
