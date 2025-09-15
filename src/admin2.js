@@ -61,25 +61,23 @@ addTargetBtn.addEventListener("click", () => {
     // scale
     const scaleDiv = document.createElement("div");
     scaleDiv.classList.add("mb-1");
-    if (type === "Image") {
-      scaleDiv.innerHTML = `
-        <label class="form-label">Scale (x,y,z)</label>
-        <input type="text" class="form-control scale" placeholder="1,1,1" required>
-      `;
-    } else {
-      scaleDiv.innerHTML = `
-        <label class="form-label">Scale (x,y,z)</label>
-        <input type="text" class="form-control scale" placeholder="0.2,0.2,0.2" required>
-      `;
-    }
+    let defaultScale = type === "3D Model" ? 0.1 : 1;
+    scaleDiv.innerHTML = `
+    <label class="form-label">Scale</label>
+    <input type="number" class="form-control scale" value="${defaultScale}" step="0.1" min="0" required>
+  `;
 
     // position
     const posDiv = document.createElement("div");
     posDiv.classList.add("mb-1");
     posDiv.innerHTML = `
-      <label class="form-label">Position (x,y,z)</label>
-      <input type="text" class="form-control position" placeholder="0,0,0" required>
-    `;
+    <label class="form-label">Position (x,y,z)</label>
+    <div class="d-flex gap-2">
+      <input type="number" class="form-control position-x" value="0" step="0.1" required>
+      <input type="number" class="form-control position-y" value="0" step="0.1" required>
+      <input type="number" class="form-control position-z" value="0" step="0.1" required>
+    </div>
+  `;
 
     // opacity สำหรับ Image เท่านั้น
     let opacityDiv = null;
@@ -87,9 +85,9 @@ addTargetBtn.addEventListener("click", () => {
       opacityDiv = document.createElement("div");
       opacityDiv.classList.add("mb-1");
       opacityDiv.innerHTML = `
-        <label class="form-label">Opacity</label>
-        <input type="number" class="form-control opacity" placeholder="1" step="0.1" min="0" max="1" required>
-      `;
+      <label class="form-label">Opacity</label>
+      <input type="number" class="form-control opacity" value="1" step="0.1" min="0" max="1" required>
+    `;
     }
 
     fieldsDiv.appendChild(scaleDiv);
