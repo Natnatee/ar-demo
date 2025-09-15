@@ -9,7 +9,6 @@ const arDataForm = document.getElementById("ar-data-form");
 setTimeout(renderMindFiles, 2000);
 
 function renderMindFiles() {
-  
   const mindFiles = arAssets.filter((asset) => asset.type === "Mind");
   mindSelect.innerHTML = `<option value="">เลือก Mind File</option>`;
   mindFiles.forEach((file) => {
@@ -24,7 +23,6 @@ function renderMindFiles() {
 let targetCount = 0;
 
 addTargetBtn.addEventListener("click", () => {
-
   // filter สำหรับ dropdown target
   const selectableAssets = arAssets.filter((a) =>
     ["Image", "3D Model", "Video"].includes(a.type)
@@ -109,10 +107,14 @@ addTargetBtn.addEventListener("click", () => {
 });
 
 // Submit form
-arDataForm.addEventListener("submit", (e) => {
+arDataForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const arData = { "image tracking": {}, mindFile: mindSelect.value };
+  const arData = {
+    id: "4dce27a0-486c-4d87-a0b7-7c6b66dd210e",
+    "image tracking": {},
+    mindFile: mindSelect.value,
+  };
 
   const targets = targetContainer.querySelectorAll("div[data-target-id]");
   targets.forEach((div, idx) => {
@@ -131,7 +133,6 @@ arDataForm.addEventListener("submit", (e) => {
 
     const targetObj = { type, src, scale, position };
 
-    // เพิ่มค่าเฉพาะ Image / Video fields
     if (type === "Image") {
       const opacity = parseFloat(div.querySelector(".opacity").value);
       targetObj.opacity = opacity;
@@ -145,5 +146,26 @@ arDataForm.addEventListener("submit", (e) => {
     arData["image tracking"]["target" + idx] = targetObj;
   });
 
-  console.log("export const ARData =", arData);
+  // ยิง API PUT
+  try {
+    const response = await fetch(
+      "https://msdwbkeszkklbelimvaw.supabase.co/rest/v1/ARData?id=eq.4dce27a0-486c-4d87-a0b7-7c6b66dd210e",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify([arData]),
+      }
+    );
+
+    if (!response.ok) throw new Error("ไม่สามารถอัปเดต ARData ได้");
+
+    alert("อัปเดต ARData สำเร็จ!");
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาด:", error);
+    alert("เกิดข้อผิดพลาดในการอัปเดต ARData");
+  }
 });
