@@ -6,7 +6,6 @@ const headers = {
   apikey: SUPABASE_ANON_KEY,
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
 };
-
 // State สำหรับเก็บข้อมูล Assets
 let arAssets = [];
 
