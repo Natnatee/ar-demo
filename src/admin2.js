@@ -105,36 +105,52 @@ addTargetBtn.addEventListener("click", () => {
 });
 
 // Submit form
+// Submit form
 arDataForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const arData = {
     id: "4dce27a0-486c-4d87-a0b7-7c6b66dd210e",
     "image tracking": {},
-    mindFile: mindSelect.value,
+    mindFile: mindSelect.value || "", // default ว่างถ้าไม่ได้เลือก
   };
 
   const targets = targetContainer.querySelectorAll("div[data-target-id]");
   targets.forEach((div, idx) => {
     const select = div.querySelector("select");
-    const option = select.selectedOptions[0];
+    const option = select?.selectedOptions[0];
     if (!option) return;
 
     const type = option.dataset.type;
     const src = option.dataset.src;
 
-    const scaleStr = div.querySelector(".scale").value;
-    const scale = scaleStr.split(",").map(Number);
+    // scale
+    const scaleInput = div.querySelector(".scale");
+    const scale = scaleInput
+      ? [
+          Number(scaleInput.value),
+          Number(scaleInput.value),
+          Number(scaleInput.value),
+        ]
+      : type === "3D Model"
+      ? [0.1, 0.1, 0.1]
+      : [1, 1, 1];
 
-    const posStr = div.querySelector(".position").value;
-    const position = posStr.split(",").map(Number);
+    // position
+    const posX = div.querySelector(".position-x")?.value || 0;
+    const posY = div.querySelector(".position-y")?.value || 0;
+    const posZ = div.querySelector(".position-z")?.value || 0;
+    const position = [Number(posX), Number(posY), Number(posZ)];
 
     const targetObj = { type, src, scale, position };
 
+    // opacity สำหรับ Image
     if (type === "Image") {
-      const opacity = parseFloat(div.querySelector(".opacity").value);
-      targetObj.opacity = opacity;
+      const opacity = div.querySelector(".opacity")?.value || 1;
+      targetObj.opacity = Number(opacity);
     }
+
+    // Video fields
     if (type === "Video") {
       targetObj.autoplay = true;
       targetObj.loop = true;
