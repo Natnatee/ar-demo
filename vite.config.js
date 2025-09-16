@@ -6,7 +6,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         multi: 'multi-target.html',
-        admin: 'admin.html'
+        dashboard: 'admin.html'
       }
     }
   }
