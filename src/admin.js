@@ -109,9 +109,11 @@ function getAssetType(fileName) {
       return "Mind";
     case "gltf":
       return "3D Model";
+    case "glb":
+      return "3D Model";
     default:
       throw new Error(
-        "นามสกุลไฟล์ไม่รองรับ (รองรับเฉพาะ .mp4, .jpg, .jpeg, .png, .mind, .gltf)"
+        "นามสกุลไฟล์ไม่รองรับ (รองรับเฉพาะ .mp4, .jpg, .jpeg, .png, .mind, .gltf, .glb)"
       );
   }
 }
