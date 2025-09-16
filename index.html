@@ -7,12 +7,63 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image.prod.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-aframe.prod.js"></script>
+    <!-- เพิ่ม Font Awesome เพื่อใช้ไอคอนลูกศรหมุน -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
     <style>
-      body { margin: 0; font-family: Arial; }
-      .status { position: fixed; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 8px; }
+      body {
+        margin: 0;
+        font-family: Arial;
+      }
+      .status {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        z-index: 1000;
+      }
+      .refresh-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #2196f3; /* สีฟ้าสดใส */
+        color: white;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 50%; /* ทำให้ปุ่มเป็นวงกลม */
+        cursor: pointer;
+        font-size: 20px; /* ขนาดไอคอน */
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* เพิ่มเงาให้ปุ่มดูสวย */
+        transition: transform 0.3s, background 0.3s; /* เอฟเฟกต์หมุนและเปลี่ยนสี */
+      }
+      .refresh-button:hover {
+        background: #1976d2; /* สีฟ้าเข้มเมื่อ hover */
+        transform: rotate(360deg); /* หมุน 360 องศาเมื่อ hover */
+      }
+      .refresh-button i {
+        margin: 0; /* ลบ margin เพื่อให้ไอคอนอยู่กึ่งกลาง */
+      }
     </style>
   </head>
   <body>
     <div class="status" id="status">กำลังโหลด AR...</div>
+    <button class="refresh-button" onclick="refreshPage()">
+      <i class="fas fa-sync-alt"></i>
+      <!-- ไอคอนลูกศรหมุนจาก Font Awesome -->
+    </button>
+    <script>
+      function refreshPage() {
+        window.location.reload();
+      }
+    </script>
   </body>
 </html>
