@@ -4,7 +4,69 @@ const targetContainer = document.getElementById("target-fields");
 const addTargetBtn = document.getElementById("add-target");
 const arDataForm = document.getElementById("ar-data-form");
 
-setTimeout(renderMindFiles, 2000);
+setTimeout(() => {
+  renderMindFiles();
+  loadARData();
+}, 2000);
+
+// --- Load ARData from Supabase and populate the form ---
+async function loadARData() {
+  const url =
+    "https://msdwbkeszkklbelimvaw.supabase.co/rest/v1/ARData?id=eq.4dce27a0-486c-4d87-a0b7-7c6b66dd210e";
+  try {
+    const headers = {};
+    if (typeof SUPABASE_ANON_KEY !== "undefined") {
+      headers.apikey = SUPABASE_ANON_KEY;
+      headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
+    }
+
+    const resp = await fetch(url, { method: "GET", headers });
+    if (!resp.ok) throw new Error(`Fetch failed ${resp.status}`);
+    const json = await resp.json();
+    if (!Array.isArray(json) || json.length === 0) return;
+
+    const data = json[0];
+
+    // set mind file select (create option if not present)
+    if (data.mindFile) {
+      let found = false;
+      for (const opt of mindSelect.options) {
+        if (opt.value === data.mindFile) {
+          opt.selected = true;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        const option = document.createElement("option");
+        option.value = data.mindFile;
+        option.textContent = "Saved Mind File";
+        option.selected = true;
+        mindSelect.appendChild(option);
+      }
+    }
+
+    // populate targets
+    targetContainer.innerHTML = "";
+    targetCount = 0;
+
+    const imageTracking = data["image tracking"] || {};
+    const keys = Object.keys(imageTracking).sort((a, b) => {
+      const na = Number(a.replace(/\D/g, "")) || 0;
+      const nb = Number(b.replace(/\D/g, "")) || 0;
+      return na - nb;
+    });
+
+    keys.forEach((k) => {
+      const models = imageTracking[k];
+      if (Array.isArray(models)) {
+        createTargetFromModels(models);
+      }
+    });
+  } catch (err) {
+    console.error("loadARData error", err);
+  }
+}
 
 function renderMindFiles() {
   const mindFiles = arAssets.filter((asset) => asset.type === "Mind");
@@ -20,7 +82,8 @@ function renderMindFiles() {
 let targetCount = 0;
 
 // --- ฟังก์ชันสร้าง model fields ---
-function createModelField(selectableAssets, targetDiv) {
+// createModelField now accepts optional modelData to pre-fill values
+function createModelField(selectableAssets, targetDiv, modelData = null) {
   const modelDiv = document.createElement("div");
   modelDiv.classList.add("mb-2", "border", "p-2", "rounded");
 
@@ -93,6 +156,43 @@ function createModelField(selectableAssets, targetDiv) {
     fieldsDiv.appendChild(posDiv);
     fieldsDiv.appendChild(rotDiv);
     if (opacityDiv) fieldsDiv.appendChild(opacityDiv);
+
+    // if we were given modelData, populate the inputs after the fields are created
+    if (modelData) {
+      // try to set scale
+      const scaleInput = fieldsDiv.querySelector(".scale");
+      if (scaleInput && Array.isArray(modelData.scale)) {
+        scaleInput.value = modelData.scale[0];
+      }
+
+      // position
+      const posX = fieldsDiv.querySelector(".position-x");
+      const posY = fieldsDiv.querySelector(".position-y");
+      const posZ = fieldsDiv.querySelector(".position-z");
+      if (posX && Array.isArray(modelData.position)) {
+        posX.value = modelData.position[0];
+        posY.value = modelData.position[1];
+        posZ.value = modelData.position[2];
+      }
+
+      // rotation
+      const rotX = fieldsDiv.querySelector(".rotation-x");
+      const rotY = fieldsDiv.querySelector(".rotation-y");
+      const rotZ = fieldsDiv.querySelector(".rotation-z");
+      if (rotX && Array.isArray(modelData.rotation)) {
+        rotX.value = modelData.rotation[0];
+        rotY.value = modelData.rotation[1];
+        rotZ.value = modelData.rotation[2];
+      }
+
+      // opacity
+      if (modelData.type === "Image") {
+        const opacityInput = fieldsDiv.querySelector(".opacity");
+        if (opacityInput && typeof modelData.opacity !== "undefined") {
+          opacityInput.value = modelData.opacity;
+        }
+      }
+    }
   }
 
   select.addEventListener("change", updateFields);
@@ -100,6 +200,59 @@ function createModelField(selectableAssets, targetDiv) {
   modelDiv.appendChild(select);
   modelDiv.appendChild(fieldsDiv);
   targetDiv.querySelector(".models-container").appendChild(modelDiv);
+
+  // if modelData is provided, select the matching option (by src) and update fields
+  if (modelData) {
+    // find option matching the src
+    for (const opt of select.options) {
+      if (opt.dataset && opt.dataset.src === modelData.src) {
+        opt.selected = true;
+        break;
+      }
+    }
+    updateFields();
+  }
+}
+
+// helper to create a target div and optionally populate it with model entries
+function createTargetFromModels(modelArray = []) {
+  const selectableAssets = arAssets.filter((a) =>
+    ["Image", "3D Model", "Video"].includes(a.type)
+  );
+
+  const div = document.createElement("div");
+  div.classList.add("mb-3", "border", "p-2", "rounded");
+  div.dataset.targetId = targetCount;
+
+  const targetLabel = document.createElement("label");
+  targetLabel.classList.add("form-label");
+  targetLabel.textContent = `Target ${targetCount + 1}`;
+
+  const modelsContainer = document.createElement("div");
+  modelsContainer.classList.add("models-container", "mb-2");
+
+  // ปุ่มเพิ่ม Model
+  const addModelBtn = document.createElement("button");
+  addModelBtn.type = "button";
+  addModelBtn.classList.add("btn", "btn-sm", "btn-secondary", "mb-2");
+  addModelBtn.textContent = "เพิ่ม Model";
+  addModelBtn.addEventListener("click", () => {
+    createModelField(selectableAssets, div);
+  });
+
+  div.appendChild(targetLabel);
+  div.appendChild(modelsContainer);
+  div.appendChild(addModelBtn);
+  targetContainer.appendChild(div);
+
+  // if modelArray provided, create for each, else create one default
+  if (Array.isArray(modelArray) && modelArray.length > 0) {
+    modelArray.forEach((m) => createModelField(selectableAssets, div, m));
+  } else {
+    createModelField(selectableAssets, div);
+  }
+
+  targetCount++;
 }
 
 // --- เพิ่ม Target ---
