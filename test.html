@@ -28,9 +28,10 @@
         display: none;
       }
     </style>
-    <!-- รวม Three.js และ GLTFLoader จาก CDN -->
+    <!-- รวม Three.js, GLTFLoader และ OrbitControls จาก CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
   </head>
   <body>
     <canvas id="model-canvas"></canvas>
@@ -54,7 +55,7 @@
         0.1,
         1000
       );
-      camera.position.set(0, 2, 5); // ปรับตำแหน่งกล้องให้มองเห็น grid และโมเดล
+      camera.position.set(0, 2, 5); // ตำแหน่งกล้องเริ่มต้น
 
       const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
@@ -65,6 +66,16 @@
         canvas.style.height = "100vh";
       }
       renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // เพิ่ม OrbitControls
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true; // เพิ่มความนุ่มนวลในการควบคุม
+      controls.dampingFactor = 0.05;
+      controls.screenSpacePanning = false; // ป้องกันการแพนในระนาบหน้าจอ
+      controls.minDistance = 1; // ระยะซูมเข้าใกล้สุด
+      controls.maxDistance = 50; // ระยะซูมออกไกลสุด
+      controls.enablePan = true; // เปิดใช้งานการแพน
+      controls.enableZoom = true; // เปิดใช้งานการซูม
 
       // เพิ่มแสง
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -121,12 +132,10 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
 
-      // การเรนเดอร์และหมุนโมเดล
+      // การเรนเดอร์
       function animate() {
         requestAnimationFrame(animate);
-        if (model) {
-          model.rotation.y += 0.01; // หมุนโมเดลรอบแกน Y เพื่อให้เห็นชัด
-        }
+        controls.update(); // อัปเดตการควบคุมกล้อง
         renderer.render(scene, camera);
       }
       animate();
