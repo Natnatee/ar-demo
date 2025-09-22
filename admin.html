@@ -71,6 +71,20 @@
       .home-button i {
         margin: 0; /* ลบ margin เพื่อให้ไอคอนอยู่กึ่งกลาง */
       }
+      #ar-assets-table tbody {
+        display: block;
+        max-height: 300px; /* ~30px per row for 10 rows */
+        overflow-y: auto;
+      }
+      #ar-assets-table thead,
+      #ar-assets-table tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+      #ar-assets-table thead {
+        width: calc(100% - 1em); /* Adjust for scrollbar width */
+      }
       @media (max-width: 576px) {
         .container {
           padding: 10px;
@@ -110,8 +124,9 @@
               <label for="asset-file" class="form-label">อัปโหลดไฟล์</label>
               <div class="file-drop-area" id="file-drop-area">
                 <p>
-                  ลากและวางไฟล์ที่นี่ หรือคลิกเพื่อเลือกไฟล์<br />(ไม่เกิน 50 mb, ชื่อไฟล์ปกติ, ชื่อไฟล์ไม่ซ้ำ, รองรับเฉพาะ
-                  .mp4, .jpg, .jpeg, .png, .mind, .gltf)
+                  ลากและวางไฟล์ที่นี่ หรือคลิกเพื่อเลือกไฟล์<br />(ไม่เกิน 50
+                  mb, ชื่อไฟล์ปกติ, ชื่อไฟล์ไม่ซ้ำ, รองรับเฉพาะ .mp4, .jpg,
+                  .jpeg, .png, .mind, .gltf)
                 </p>
                 <input
                   type="file"
