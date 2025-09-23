@@ -38,6 +38,38 @@ async function initAR() {
 
     const assets = document.createElement("a-assets");
     scene.appendChild(assets);
+    // --- Add lights similar to modelViewer ---
+    // Ambient light
+    const ambientLight = document.createElement("a-entity");
+    ambientLight.setAttribute(
+      "light",
+      "type: ambient; color: #fff5cc; intensity: 2"
+    );
+    scene.appendChild(ambientLight);
+
+    // Directional light 1 (main)
+    const dirLight1 = document.createElement("a-entity");
+    dirLight1.setAttribute(
+      "light",
+      "type: directional; color: #ffffff; intensity: 2; castShadow: true"
+    );
+    dirLight1.setAttribute("position", "5 10 5");
+    // Shadow tuning (A-Frame/light adapters may ignore unsupported props)
+    dirLight1.setAttribute(
+      "shadow",
+      "mapSizeWidth: 1024; mapSizeHeight: 1024; cameraNear: 0.5; cameraFar: 50"
+    );
+    scene.appendChild(dirLight1);
+
+    // Directional light 2 (fill)
+    const dirLight2 = document.createElement("a-entity");
+    dirLight2.setAttribute(
+      "light",
+      "type: directional; color: #aaaaaa; intensity: 2"
+    );
+    dirLight2.setAttribute("position", "-5 5 -5");
+    scene.appendChild(dirLight2);
+
     document.body.appendChild(scene);
 
     let targetIndex = 0;
