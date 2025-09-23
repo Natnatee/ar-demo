@@ -36,109 +36,17 @@
   <body>
     <canvas id="model-canvas"></canvas>
     <div id="error-message"></div>
+    <script src="modelViewer.js"></script>
     <script>
-      // ฟังก์ชันแสดงข้อความผิดพลาด
-      function showError(message) {
-        const errorDiv = document.getElementById("error-message");
-        errorDiv.textContent = message;
-        errorDiv.style.display = "block";
-      }
-
-      // เริ่มต้น Three.js
-      const canvas = document.getElementById("model-canvas");
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x808080); // ตั้งค่าสีพื้นหลัง canvas เป็นสีเทา
-
-      const camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-      );
-      camera.position.set(0, 2, 5); // ตำแหน่งกล้องเริ่มต้น
-
-      const renderer = new THREE.WebGLRenderer({
-        canvas: canvas,
-        antialias: true,
-      });
-      if (canvas.clientWidth === 0 || canvas.clientHeight === 0) {
-        canvas.style.width = "100%";
-        canvas.style.height = "100vh";
-      }
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
-      // เพิ่ม OrbitControls
-      const controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true; // เพิ่มความนุ่มนวลในการควบคุม
-      controls.dampingFactor = 0.05;
-      controls.screenSpacePanning = false; // ป้องกันการแพนในระนาบหน้าจอ
-      controls.minDistance = 1; // ระยะซูมเข้าใกล้สุด
-      controls.maxDistance = 50; // ระยะซูมออกไกลสุด
-      controls.enablePan = true; // เปิดใช้งานการแพน
-      controls.enableZoom = true; // เปิดใช้งานการซูม
-
-      // เพิ่มแสง
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-      directionalLight.position.set(0, 1, 1);
-      scene.add(directionalLight);
-
-      // เพิ่ม GridHelper เพื่อแสดงมิติ
-      const gridHelper = new THREE.GridHelper(10, 10, 0x000000, 0x444444); // ขนาด 10x10, สีตาราง
-      gridHelper.position.y = -1; // วาง grid ต่ำกว่าโมเดลเล็กน้อย
-      scene.add(gridHelper);
-
-      // ตัวแปรสำหรับโมเดล
-      let model;
-
-      // ตรวจสอบว่า THREE.GLTFLoader มีอยู่
-      if (typeof THREE.GLTFLoader !== "function") {
-        showError("GLTFLoader is not available. Check CDN or script loading.");
-        throw new Error("GLTFLoader is not available");
-      }
-
-      // โหลดโมเดล GLTF
-      const loader = new THREE.GLTFLoader();
-      loader.load(
-        "/public/robot.glb", // เส้นทางไปยังไฟล์ในโฟลเดอร์ public
-        (gltf) => {
-          model = gltf.scene;
-          scene.add(model);
-
-          // ปรับขนาดและตำแหน่งโมเดลให้เหมาะสม
-          model.scale.set(1, 1, 1); // ปรับขนาดตามต้องการ
-          model.position.set(0, 0, 0); // ตั้งตำแหน่งกึ่งกลาง
-          console.log("Model loaded successfully");
-        },
-        (progress) => {
-          console.log(
-            `Loading model: ${(
-              (progress.loaded / progress.total) *
-              100
-            ).toFixed(2)}%`
-          );
-        },
-        (error) => {
-          console.error("Error loading GLTF model:", error);
-          showError("Failed to load model.gltf: " + error.message);
-        }
-      );
-
-      // จัดการการปรับขนาดหน้าต่าง
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-
-      // การเรนเดอร์
-      function animate() {
-        requestAnimationFrame(animate);
-        controls.update(); // อัปเดตการควบคุมกล้อง
-        renderer.render(scene, camera);
-      }
-      animate();
+      // กำหนดค่าเริ่มต้นสำหรับโมเดล
+      const modelConfig = {
+        src: "/public/robot.glb",
+        scale: { x: 1, y: 1, z: 1 },
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 },
+      };
+      // เรียกใช้ฟังก์ชันจาก modelViewer.js
+      initModelViewer(modelConfig);
     </script>
   </body>
 </html>
