@@ -80,12 +80,6 @@ export function initModelViewer(config) {
   // === ระนาบอ้างอิง Tracking (โปร่งใส + ขอบเส้น) ===
   const refSize = 2; // ขนาดระนาบอ้างอิง
   const refPlaneGeo = new THREE.PlaneGeometry(refSize, refSize);
-  const refPlaneMat = new THREE.MeshBasicMaterial({
-    color: 0x00ffff,
-    transparent: true,
-    opacity: 0.3,
-    side: THREE.DoubleSide,
-  });
 
   const refEdges = new THREE.EdgesGeometry(refPlaneGeo);
   const refWireMat = new THREE.LineBasicMaterial({ color: 0x00ffff });
