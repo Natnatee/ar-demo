@@ -14,7 +14,7 @@ window._modelViewer = window._modelViewer || {
   initialized: false,
 };
 
-export function initModelViewer(config) {
+function initModelViewer(config) {
   // Dispose renderer เดิมหากมี และรีเซ็ตสถานะ
   if (window._modelViewer.initialized) {
     if (window._modelViewer.renderer) {

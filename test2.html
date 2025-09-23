@@ -32,12 +32,12 @@
     </style>
     <!-- Import Three.js dependencies as ES modules -->
     <!-- Import the model viewer module -->
-    <script type="module">
-      import { initModelViewer } from "/public/modelViewer.js";
-
-      // Initialize the model viewer with parameters
-      // Example: pass an array of model configs to render multiple models
-      // Use the new payload structure (arrays for scale/position/rotation)
+  </head>
+  <body>
+    <canvas id="model-canvas"></canvas>
+    <div id="error-message"></div>
+    <script src="/public/modelViewer.js"></script>
+    <script>
       initModelViewer([
         {
           src: "https://msdwbkeszkklbelimvaw.supabase.co/storage/v1/object/assets/car.glb",
@@ -67,12 +67,7 @@
           position: [0, 0, 0],
           rotation: [0, 0, 0],
         },
-
       ]);
     </script>
-  </head>
-  <body>
-    <canvas id="model-canvas"></canvas>
-    <div id="error-message"></div>
   </body>
 </html>
