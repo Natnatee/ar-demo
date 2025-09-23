@@ -1,22 +1,19 @@
-function showError(message) {
-  const errorDiv = document.getElementById("error-message");
-  if (!errorDiv) {
-    console.error("Error container not found:", message);
-    return;
-  }
-  errorDiv.textContent = message;
-  errorDiv.style.display = "block";
-}
-
 // เก็บ renderer และสถานะใน global เพื่อป้องกันซ้ำ
 window._modelViewer = window._modelViewer || {
   renderer: null,
   initialized: false,
+  // id ของ requestAnimationFrame เพื่อยกเลิกได้เมื่อปิดหรือสร้างใหม่
+  animationId: null,
 };
 
-function initModelViewer(config) {
+function initModelViewer(config, canvas_id) {
   // Dispose renderer เดิมหากมี และรีเซ็ตสถานะ
   if (window._modelViewer.initialized) {
+    // ยกเลิก animation loop เดิม
+    if (window._modelViewer.animationId != null) {
+      cancelAnimationFrame(window._modelViewer.animationId);
+      window._modelViewer.animationId = null;
+    }
     if (window._modelViewer.renderer) {
       window._modelViewer.renderer.dispose();
       window._modelViewer.renderer.forceContextLoss?.();
@@ -28,19 +25,31 @@ function initModelViewer(config) {
 
   const configs = Array.isArray(config) ? config : [config];
 
-  const canvas = document.getElementById("model-canvas");
+  const canvas = document.getElementById(canvas_id);
+  if (!canvas) {
+    console.error(`Canvas #${canvas_id} not found`);
+    throw new Error(`Canvas not found: ${canvas_id}`);
+  }
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x808080);
 
   const camera = new THREE.PerspectiveCamera(
     75,
-    window.innerWidth / window.innerHeight,
+    Math.max(1, canvas.clientWidth) / Math.max(1, canvas.clientHeight || 1),
     0.1,
     1000
   );
   camera.position.set(0, 2, 5);
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  // ใช้ options ที่ช่วยลดโอกาส context สร้างไม่สำเร็จในรอบถัดไป
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: false,
+    powerPreference: "high-performance",
+    failIfMajorPerformanceCaveat: false,
+  });
   window._modelViewer.renderer = renderer;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -49,7 +58,7 @@ function initModelViewer(config) {
     canvas.style.width = "100%";
     canvas.style.height = "100vh";
   }
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, false);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -234,13 +243,16 @@ function initModelViewer(config) {
   });
 
   window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    const w = canvas.clientWidth || window.innerWidth;
+    const h = canvas.clientHeight || window.innerHeight;
+    camera.aspect = w / Math.max(1, h);
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(w, h, false);
   });
 
   function animate() {
-    requestAnimationFrame(animate);
+    window._modelViewer.animationId = requestAnimationFrame(animate);
+    if (!renderer || !renderer.domElement) return;
     controls.update();
     renderer.render(scene, camera);
   }

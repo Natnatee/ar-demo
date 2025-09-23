@@ -1,4 +1,3 @@
-// admin2.js (Refactored)
 const mindSelect = document.getElementById("mind-file-select");
 const targetContainer = document.getElementById("target-fields");
 const addTargetBtn = document.getElementById("add-target");
@@ -72,8 +71,6 @@ async function loadARData() {
 }
 
 // ---------- Targets / Models ----------
-// --- Targets / Models ---
-// เพิ่มปุ่มลบ Target
 function createTarget(models = []) {
   const div = createEl("div", ["mb-3", "border", "p-2", "rounded"]);
   div.dataset.targetId = targetCount;
@@ -88,9 +85,136 @@ function createTarget(models = []) {
     createEl("label", ["form-label", "mb-0"], `Target ${targetCount + 1}`),
     createEl("button", ["btn", "btn-sm", "btn-danger"], "ลบ Target")
   );
-  headerDiv.querySelector("button").onclick = () => div.remove();
+  headerDiv.querySelector("button").onclick = () => {
+    // Dispose renderer when deleting target
+    if (window._modelViewer?.renderer) {
+      window._modelViewer.renderer.dispose();
+      window._modelViewer.renderer.forceContextLoss?.();
+      window._modelViewer.renderer.domElement = null;
+      window._modelViewer.renderer = null;
+      window._modelViewer.initialized = false;
+    }
+    div.remove();
+  };
 
   const modelsContainer = createEl("div", ["models-container", "mb-2"]);
+
+  // Create preview button
+  const previewBtn = createEl(
+    "button",
+    ["btn", "btn-sm", "btn-primary", "mb-2"],
+    "Preview"
+  );
+  previewBtn.type = "button";
+
+  // Create modal
+  const modalId = `modal_${targetCount}`;
+  const canvasId = `canvas_${targetCount}`;
+  const modal = createEl("div", ["modal", "fade"], "");
+  modal.id = modalId;
+  modal.style.display = "none";
+  modal.innerHTML = `
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Preview Target ${targetCount + 1}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="overflow: hidden; max-width: 100%;">
+          <div style="width: 100%; height: 400px; position: relative;">
+            <canvas id="${canvasId}" style="max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add modal event handling
+  previewBtn.onclick = () => {
+    modal.style.display = "block";
+    modal.classList.add("show");
+
+    // สร้าง models จากฟอร์มใหม่ทุกครั้ง
+    const models = [];
+    div.querySelectorAll(".models-container>div").forEach((m) => {
+      const opt = m.querySelector("select")?.selectedOptions[0];
+      if (!opt) return;
+
+      const type = opt.dataset.type,
+        src = opt.dataset.src;
+      const s =
+        +m.querySelector(".scale").value || (type === "3D Model" ? 0.1 : 1);
+      const scale = [s, s, s];
+      const position = ["x", "y", "z"].map(
+        (a) => +m.querySelector(`.position-${a}`).value || 0
+      );
+      const rotation = ["x", "y", "z"].map(
+        (a) => +m.querySelector(`.rotation-${a}`).value || 0
+      );
+
+      const model = { type, src, scale, position, rotation };
+      if (type === "Image")
+        model.opacity = +m.querySelector(".opacity").value || 1;
+      if (type === "Video")
+        Object.assign(model, { autoplay: true, loop: true, muted: true });
+
+      models.push(model);
+    });
+
+    // สร้าง canvas ใหม่ทุกครั้งเพื่อหลีกเลี่ยง WebGL context เก่าค้าง
+    const oldCanvas = modal.querySelector(`#${canvasId}`);
+    if (oldCanvas) {
+      const fresh = document.createElement("canvas");
+      fresh.id = canvasId;
+      fresh.style.maxWidth = "100%";
+      fresh.style.maxHeight = "100%";
+      fresh.style.width = "100%";
+      fresh.style.height = "100%";
+      fresh.style.objectFit = "contain";
+      oldCanvas.replaceWith(fresh);
+    }
+
+    setTimeout(() => {
+      try {
+        initModelViewer(models, canvasId);
+      } catch (e) {
+        console.error("Failed to initialize model viewer:", e);
+        alert("เกิดข้อผิดพลาดในการโหลดตัวอย่าง");
+        modal.style.display = "none";
+        modal.classList.remove("show");
+      }
+    }, 100);
+  };
+
+  // ปุ่มปิด modal: รวม logic ให้ทำความสะอาด context และยกเลิก animation
+  modal.querySelector(".btn-close").onclick = () => {
+    // ยกเลิก animation frame ถ้ายังรันอยู่
+    if (window._modelViewer?.animationId != null) {
+      cancelAnimationFrame(window._modelViewer.animationId);
+      window._modelViewer.animationId = null;
+    }
+    // Dispose renderer
+    if (window._modelViewer?.renderer) {
+      try {
+        window._modelViewer.renderer.dispose();
+        window._modelViewer.renderer.forceContextLoss?.();
+      } catch (_) {}
+      window._modelViewer.renderer.domElement = null;
+      window._modelViewer.renderer = null;
+    }
+    window._modelViewer.initialized = false;
+
+    // รีเซ็ต canvas (ล้างภาพค้าง)
+    const c = modal.querySelector("canvas");
+    if (c) {
+      const ctx2d = c.getContext("2d");
+      ctx2d?.clearRect(0, 0, c.width, c.height);
+    }
+
+    // ปิด modal
+    modal.style.display = "none";
+    modal.classList.remove("show");
+  };
 
   const addModelBtn = createEl(
     "button",
@@ -100,7 +224,7 @@ function createTarget(models = []) {
   addModelBtn.type = "button";
   addModelBtn.onclick = () => createModelField(div);
 
-  div.append(headerDiv, modelsContainer, addModelBtn);
+  div.append(headerDiv, previewBtn, modelsContainer, addModelBtn, modal);
   targetContainer.appendChild(div);
 
   (models.length ? models : [null]).forEach((m) => createModelField(div, m));
