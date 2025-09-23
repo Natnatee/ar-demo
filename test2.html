@@ -12,7 +12,7 @@
       body {
         margin: 0;
         overflow: hidden;
-        background-color: #808080;
+        background-color: #ffffff;
       }
       canvas {
         width: 100%;
@@ -36,13 +36,31 @@
       import { initModelViewer } from "/public/modelViewer.js";
 
       // Initialize the model viewer with parameters
-      initModelViewer({
-        canvasId: "model-canvas",
-        position: { x: 0, y: 0, z: 0 },
-        scale: { x: 1, y: 1, z: 1 },
-        rotation: { x: 0, y: 0, z: 0 },
-        src: "/public/robot.glb",
-      });
+      // Example: pass an array of model configs to render multiple models
+      // Use the new payload structure (arrays for scale/position/rotation)
+      initModelViewer([
+        {
+          src: "https://msdwbkeszkklbelimvaw.supabase.co/storage/v1/object/assets/car.glb",
+          type: "3D Model",
+          scale: [0.5, 0.5, 0.5],
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+        },
+        {
+          src: "/public/robot.glb",
+          type: "3D Model",
+          scale: [1, 1, 1],
+          position: [1.5, 0, 0],
+          rotation: [0, 180, 0],
+        },
+        {
+          src: "/public/flower.mp4",
+          type: "Video",
+          scale: [1, 1, 1],
+          position: [0, 0, 0],
+          rotation: [0, 0, 0],
+        },
+      ]);
     </script>
   </head>
   <body>
